@@ -1,0 +1,107 @@
+SELECT
+"public"."tblTobaccoPipe"."ArtifactID",
+"public"."tblTobaccoPipe"."Quantity",
+"public"."tblTobaccoPipeMaterial"."TobaccoPipeMaterial" as "Material",
+"paste"."MunsellRangeAppliedColor" as "PasteColor",
+"public"."tblTobaccoPipeGlazeType"."GlazeType",
+"glaze"."AppliedColorWrittenDescription" as "GlazeColor",
+"public"."tblTobaccoPipe"."StemLength",
+"public"."tblTobaccoPipe"."ExteriorStemDiameter",
+"public"."tblTobaccoPipe"."MetricBoreDiameter",
+"public"."tblTobaccoPipe"."BoreDiameter64ths",
+"public"."tblTobaccoPipe"."Weight",
+"public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness",
+"public"."tblTobaccoPipeBowlBaseType"."BowlBaseType",
+"public"."tblTobaccoPipeBowlForm"."BowlForm",
+"public"."tblTobaccoPipeMouthpieceForm"."MouthpieceForm",
+"decoration"."YesNo" as "DecorationYN",
+"public"."tblTobaccoPipeDecoration"."TobaccoPipeDecID",
+"text"."YesNo" as "TextMarkYN",
+"public"."tblTobaccoPipeDecoration"."TobaccoPipeDecID",
+"public"."tblTobaccoPipe"."Notes",
+"public".users.userid
+FROM
+"public"."tblTobaccoPipe"
+LEFT JOIN "public"."tblTobaccoPipeMaterial" ON "public"."tblTobaccoPipe"."TobaccoPipeMaterialID" = "public"."tblTobaccoPipeMaterial"."TobaccoPipeMaterialID"
+LEFT JOIN "public"."tblMunsellAppliedColor" as "paste" ON "public"."tblTobaccoPipe"."PasteMunAppColorID" = "paste"."MunAppColorID"
+LEFT JOIN "public"."tblMunsellAppliedColor" as "glaze" ON "public"."tblTobaccoPipe"."GlazeMunAppColorID" = "glaze"."MunAppColorID"
+LEFT JOIN "public"."tblTobaccoPipeGlazeType" ON "public"."tblTobaccoPipe"."GlazeTypeID" = "public"."tblTobaccoPipeGlazeType"."GlazeTypeID"
+LEFT JOIN "public"."tblTobaccoPipeCompleteness" ON "public"."tblTobaccoPipe"."TobaccoPipeCompletenessID" = "public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompletenessID"
+LEFT JOIN "public"."tblTobaccoPipeBowlBaseType" ON "public"."tblTobaccoPipe"."BowlBaseTypeID" = "public"."tblTobaccoPipeBowlBaseType"."BowlBaseTypeID"
+LEFT JOIN "public"."tblTobaccoPipeBowlForm" ON "public"."tblTobaccoPipe"."BowlFormID" = "public"."tblTobaccoPipeBowlForm"."BowlFormID"
+LEFT JOIN "public"."tblTobaccoPipeMouthpieceForm" ON "public"."tblTobaccoPipe"."MouthpieceFormID" = "public"."tblTobaccoPipeMouthpieceForm"."MouthpieceFormID"
+LEFT JOIN "public"."tblYesNo" as "decoration" ON "public"."tblTobaccoPipe"."DecorationYN" = "decoration"."YesNoID"
+LEFT JOIN "public"."tblTobaccoPipeDecoration" ON "public"."tblTobaccoPipe"."GenerateContextArtifactID" = "public"."tblTobaccoPipeDecoration"."GenerateContextArtifactID"
+LEFT JOIN "public"."tblYesNo" as "text" ON "public"."tblTobaccoPipe"."TextMarkYN" = "text"."YesNoID"
+LEFT JOIN "public"."tblTobaccoPipeTextMark" ON "public"."tblTobaccoPipe"."GenerateContextArtifactID" = "public"."tblTobaccoPipeTextMark"."GenerateContextArtifactID"
+LEFT JOIN "public"."tblEditor" ON "tblTobaccoPipe"."EditorIDN" = "public"."tblEditor"."EditorID"
+LEFT JOIN "public"."users" ON "public".users.editor_id = "public"."tblEditor"."EditorID"
+WHERE
+(("public"."tblTobaccoPipe"."ArtifactID" LIKE '9999-%') and
+	("public".users.userid = 'ebollwerk'))
+AND
+(
+-- 1.0 Measurements Missing
+(
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%tem%' AND "public"."tblTobaccoPipe"."StemLength" is NULL 
+and "public"."tblTobaccoPipe"."Notes" not like '%plit%' AND "public"."tblTobaccoPipe"."Notes" not like '%roken%' AND 
+"public"."tblTobaccoPipe"."Notes" not like '%mm%' AND "public"."tblTobaccoPipe"."Notes" not like '%iny%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%ransition%' AND "public"."tblTobaccoPipe"."Notes" not like '%nable%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%not enough%'AND "public"."tblTobaccoPipe"."Notes" not like '%ragment%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%alf%') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%tem%' and "public"."tblTobaccoPipe"."MetricBoreDiameter" is NULL 
+and "public"."tblTobaccoPipe"."Notes" not like '%plit%' AND "public"."tblTobaccoPipe"."Notes" not like '%roken%' AND 
+"public"."tblTobaccoPipe"."Notes" not like '%mm%' AND "public"."tblTobaccoPipe"."Notes" not like '%iny%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%ransition%' AND "public"."tblTobaccoPipe"."Notes" not like '%nable%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%not enough%'AND "public"."tblTobaccoPipe"."Notes" not like '%ragment%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%alf%') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%tem%' and "public"."tblTobaccoPipe"."BoreDiameter64ths" is NULL 
+and "public"."tblTobaccoPipe"."Notes" not like '%plit%' AND "public"."tblTobaccoPipe"."Notes" not like '%roken%' AND 
+"public"."tblTobaccoPipe"."Notes" not like '%mm%' AND "public"."tblTobaccoPipe"."Notes" not like '%iny%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%ransition%' AND "public"."tblTobaccoPipe"."Notes" not like '%nable%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%not enough%' AND "public"."tblTobaccoPipe"."Notes" not like '%ragment%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%alf%') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%tem%' and "public"."tblTobaccoPipe"."ExteriorStemDiameter" is NULL 
+and ("public"."tblTobaccoPipe"."Notes" not like '%plit%' AND "public"."tblTobaccoPipe"."Notes" not like '%roken%' AND 
+"public"."tblTobaccoPipe"."Notes" not like '%mm%' AND "public"."tblTobaccoPipe"."Notes" not like '%iny%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%ransition%' AND "public"."tblTobaccoPipe"."Notes" not like '%nable%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%not enough%'AND "public"."tblTobaccoPipe"."Notes" not like '%ragment%'
+AND "public"."tblTobaccoPipe"."Notes" not like '%alf%')) OR
+("public"."tblTobaccoPipe"."Weight" IS null)
+) OR
+-- 1.1 64ths Bore Diameter Measurements Not in Proper Range
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%tem%' and "public"."tblTobaccoPipe"."BoreDiameter64ths" <> 4
+and "public"."tblTobaccoPipe"."BoreDiameter64ths" <> 5 and "public"."tblTobaccoPipe"."BoreDiameter64ths" <> 6
+and "public"."tblTobaccoPipe"."BoreDiameter64ths" <> 7 and "public"."tblTobaccoPipe"."BoreDiameter64ths" <> 8
+and "public"."tblTobaccoPipe"."BoreDiameter64ths" <> 9) OR
+
+-- 2.0 Bowl, Base, Mouthpiece Form Missing
+(("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%ase%' AND "public"."tblTobaccoPipeBowlBaseType"."BowlBaseType" = 'Not Applicable') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" = 'Complete Pipe' AND "public"."tblTobaccoPipeBowlBaseType"."BowlBaseType" = 'Not Applicable') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%owl%' AND "public"."tblTobaccoPipeBowlForm"."BowlForm" = 'Not Applicable') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" = 'Complete Pipe' AND "public"."tblTobaccoPipeBowlForm"."BowlForm" = 'Not Applicable') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" LIKE '%outh%' AND "public"."tblTobaccoPipeMouthpieceForm"."MouthpieceForm" = 'Not Applicable') OR
+("public"."tblTobaccoPipeCompleteness"."TobaccoPipeCompleteness" = 'Complete Pipe' AND "public"."tblTobaccoPipeMouthpieceForm"."MouthpieceForm" = 'Not Applicable')
+) OR
+
+-- 3.0 Glaze Type and Color Mismatch, Ball Clay Surface Color Incorrect
+(("public"."tblTobaccoPipeMaterial"."TobaccoPipeMaterial" = 'Earthenware, ball clay' AND 
+("public"."tblTobaccoPipeGlazeType"."GlazeType" = 'No Glaze' AND
+"glaze"."AppliedColorWrittenDescription" NOT LIKE 'Not Applicable')) OR
+("public"."tblTobaccoPipeMaterial"."TobaccoPipeMaterial" = 'Earthenware, ball clay' AND "paste"."MunsellRangeAppliedColor" <> '5Y 9/1, 10Y 9/1') 
+OR ("public"."tblTobaccoPipeMaterial"."TobaccoPipeMaterial" = 'Earthenware, other' AND
+"public"."tblTobaccoPipeGlazeType"."GlazeType" NOT LIKE 'No Glaze' AND "glaze"."AppliedColorWrittenDescription" = 'Not Applicable') OR 
+("public"."tblTobaccoPipeMaterial"."TobaccoPipeMaterial" = 'Earthenware, other' AND
+"public"."tblTobaccoPipeGlazeType"."GlazeType" = 'No Glaze' AND "glaze"."AppliedColorWrittenDescription" NOT LIKE 'Not Applicable')
+) OR
+-- 4.0 Decoration Info Missing
+(
+"decoration"."YesNo" = 'Yes' AND "public"."tblTobaccoPipeDecoration"."TobaccoPipeDecID" IS NULL
+) OR
+-- 5.0 Text Mark Info Missing
+(
+"text"."YesNo" = 'Yes' AND "public"."tblTobaccoPipeTextMark"."TobaccoPipeTextMarkID" IS NULL
+)
+)
+ORDER BY
+"public"."tblTobaccoPipe"."ArtifactID" ASC

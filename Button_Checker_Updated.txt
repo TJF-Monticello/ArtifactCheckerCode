@@ -1,0 +1,46 @@
+SELECT
+"a"."ArtifactID",
+"a"."Quantity",
+"a"."Length",
+"a"."Width",
+"a"."Height",
+"a"."Weight",
+"a"."Diameter",
+"b"."ButtonShape" AS "Shape",
+"c"."ButtonManuTech" AS "Manu Tech",
+"d"."Completeness",
+"e"."ButtonMaterial" AS "Material",
+"f"."ButtonType",
+"g"."BasicColor",
+"h"."ButtonMetalColor",
+"i"."Eye",
+"a"."Notes"
+FROM
+"public"."tblButton" AS "a"
+LEFT JOIN "public"."tblButtonShape" AS "b" ON "a"."ButtonShapeID" = b."ButtonShapeID"
+LEFT JOIN "public"."tblButtonManuTech" AS "c" ON "a"."ButtonManuTechID" = "c"."ButtonManuTechID"
+LEFT JOIN "public"."tblCompleteness" AS "d" ON "a"."CompletenessID" = "d"."CompletenessID"
+LEFT JOIN "public"."tblButtonMaterial" AS "e" ON "a"."ButtonMaterialID" = "e"."ButtonMaterialID"
+LEFT JOIN "public"."tblButtonType" AS "f" ON "a"."ButtonTypeID" = "f"."ButtonTypeID"
+LEFT JOIN "public"."tblBasicColor" AS "g" ON "a"."ButtonBasicColorID" = "g"."BasicColorID"
+LEFT JOIN "public"."tblButtonMetalColor" AS "h" ON "a"."ButtonMetalColorID" = "h"."ButtonMetalColorID"
+LEFT JOIN "public"."tblButtonEye" AS "i" ON "a"."EyeID" = "i"."EyeID"
+LEFT JOIN "public".users ON "a"."EditorIDN" = "public".users.editor_id
+
+WHERE
+((("a"."ArtifactID" LIKE '9999-%') AND
+("public".users.userid LIKE 'esawyer')) AND
+---1 Quantity or measurement errors---
+(("a"."Quantity" > 1) OR
+("a"."Weight" IS NULL) OR
+(("b"."ButtonShape" = 'Round') AND ("d"."Completeness" = 'Complete') AND ("a"."Diameter" IS NULL) AND ("a"."Notes" NOT LIKE'%nable%')) OR
+---2 Material and Manutech Mismatch---
+("c"."ButtonManuTech" = 'Prosser Molded' AND "e"."ButtonMaterial" NOT LIKE 'Porcelain%') OR
+(("e"."ButtonMaterial" = 'Glass') AND ("c"."ButtonManuTech" NOT IN ('Wound', 'Drawn', 'Molded', 'Unidentifiable'))) OR
+(("e"."ButtonMaterial" IN ('Bone', 'Ivory', 'Shell', 'Wood')) AND ("c"."ButtonManuTech" NOT LIKE 'Cut/Carved%')) OR
+(("f"."ButtonType" = 'Blank/Mold') AND (("e"."ButtonMaterial" NOT IN ('Bone', 'Wood')) OR ("i"."Eye" NOT IN ('One Hole', 'No Hole')))) OR
+---3 Material and Button Color Mismatch---
+(("e"."ButtonMaterial" IN ('Ceramic', 'Glass')) AND ("g"."BasicColor" = 'Not Applicable')) OR
+(("e"."ButtonMaterial" IN ('Copper Alloy', 'Gold', 'Iron', 'Lead Alloy', 'Pewter', 'Silver', 'Tombac', 'Metal, unid')) AND
+("h"."ButtonMetalColor" = 'Not Applicable'))))
+ORDER BY "a"."ArtifactID"

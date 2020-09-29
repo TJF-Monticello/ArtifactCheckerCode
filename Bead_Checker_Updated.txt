@@ -1,0 +1,27 @@
+SELECT
+"public"."tblBead"."ArtifactID" AS "ArtifactID",
+"public"."tblBead"."Quantity" AS "Quantity",
+"public"."tblBead"."Weight" AS "Weight",
+"public"."tblBead"."NumberofFacets" AS "NumberFacets",
+"public"."tblBeadShape"."BeadShape" AS "BeadShape",
+"public"."tblBead"."Notes" AS "Notes",
+"public".users.last_name
+FROM
+"public"."tblBead"
+LEFT JOIN "public"."tblBeadShape" ON "public"."tblBead"."BeadShapeID" = "public"."tblBeadShape"."BeadShapeID"
+LEFT JOIN "public".users ON "public"."tblBead"."EditorIDN" = "public".users.editor_id
+WHERE
+(("public"."tblBead"."ArtifactID" LIKE '9999%') 
+AND
+("public".users.userid = 'ebollwerk'))
+AND
+(
+-- 1.0 Measurements missing
+(("public"."tblBead"."Quantity" > 1) OR ("public"."tblBead"."Weight" IS NULL)
+OR
+-- 2.0 Facets not recorded
+(("public"."tblBeadShape"."BeadShape" = 'Faceted') AND ("public"."tblBead"."NumberofFacets" IS NULL OR "public"."tblBead"."NumberofFacets" = 0) AND ("public"."tblBead"."Notes" NOT LIKE '%not%' AND "public"."tblBead"."Notes" NOT LIKE '%able%'))
+)
+)
+ORDER BY
+"public"."tblBead"."ArtifactID"

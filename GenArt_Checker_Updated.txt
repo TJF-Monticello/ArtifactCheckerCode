@@ -1,0 +1,64 @@
+SELECT
+  a."ArtifactID",
+	a."Quantity",
+	a."Length",
+	a."Width",
+	a."Height",
+	a."Weight",
+	c."GenArtifactForm" AS "Form",
+	d."GenArtifactCompleteness" AS "Completeness",
+	g."GenArtifactManuTech" AS "ManuTech",
+	j."GenArtifactMaterialType" AS "MaterialType",
+	a."NailLength",
+	e."NailHeadType",
+	h."NailEndType",
+	a."DateAdded" AS "Date Added",
+	a."DateChanged" AS "Date Changed",
+	a."Notes",
+	users.userid AS "User" 
+FROM
+	"tblGenArtifact" AS "a"
+	LEFT JOIN "tblGenArtifactForm" AS "c" ON a."GenArtifactFormID" = c."GenArtifactFormID"
+	LEFT JOIN "tblGenArtifactCompleteness" AS "d" ON a."GenArtifactCompletenessID" = d."GenArtifactCompletenessID"
+	LEFT JOIN "tblGenArtifactNailHead" AS "e" ON a."NailHeadTypeID" = e."NailHeadTypeID"
+	LEFT JOIN "tblGenArtifactMaterial" AS "f" ON a."ArtifactID" = f."ArtifactID"
+	LEFT JOIN "tblGenArtifactMaterialType" AS "j" ON "f"."GenArtifactMaterialTypeID" = "j"."GenArtifactMaterialTypeID"
+	LEFT JOIN "tblGenArtifactManuTech" AS "g" ON f."GenArtifactManuTechID" = g."GenArtifactManuTechID"
+	LEFT JOIN "tblGenArtifactNailEnd" AS "h" ON a."NailEndTypeID" = h."NailEndTypeID"
+	LEFT JOIN "tblGenArtifactNailModification" AS "i" ON a."NailModificationID" = i."NailModificationID"
+	LEFT JOIN "tblEditor" AS "b" ON a."EditorIDN" = b."EditorID"
+	LEFT JOIN users ON b."EditorID" = users.editor_id
+	
+WHERE
+	(
+		( ( a."ArtifactID" LIKE '9988%' ) AND ( users.userid = 'ebollwerk' ) ) 
+		AND (
+--1.0 Missing Measurements
+			a."Weight" IS NULL 
+			AND a."Notes" NOT LIKE'%eight%' 
+--2.0 Nail Mismatches
+			OR ( c."GenArtifactForm" = 'Nail' AND d."GenArtifactCompleteness" = 'Incomplete' ) 
+			OR ( c."GenArtifactForm" = 'Nail' AND ( e."NailHeadType" = 'Flaw, Anvil' OR e."NailHeadType" = 'Flaw, Hardy' ) ) 
+			OR ( c."GenArtifactForm" = 'Nail' AND g."GenArtifactManuTech" LIKE 'Wrought%' AND ("d"."GenArtifactCompleteness" = 'Head' OR "d"."GenArtifactCompleteness" = 'Head and Partial Shank' OR "d"."GenArtifactCompleteness" = 'Complete')
+			AND e."NailHeadType" NOT IN ('Rosehead', 'Wrought, unid.','Headless','T-Head','L-Head','Turned Shank','Triangle/Horse')) 
+			OR (
+				( c."GenArtifactForm" = 'Nail' AND d."GenArtifactCompleteness" = 'Complete' AND g."GenArtifactManuTech" NOT LIKE 'Drawn/Wire' ) 
+				AND ( a."NailLength" IS NULL OR ( a."NailLength" = 0 ) ) 
+			) 
+			OR (
+				( c."GenArtifactForm" = 'Nail' AND d."GenArtifactCompleteness" = 'Complete' AND g."GenArtifactManuTech" NOT LIKE 'Drawn/Wire' ) 
+				AND ( e."NailHeadType" = 'Not Recorded' OR h."NailEndType" = 'Not Recorded' ) 
+			) 
+			OR ( c."GenArtifactForm" = 'Nail' AND g."GenArtifactManuTech" = 'Indeterminate' ) 
+			OR ( c."GenArtifactForm" = 'Nail' AND g."GenArtifactManuTech" = 'Cut' ) 
+
+--3.0 Form, Manutech, Material Mismatches or Use of Terms that have been phased out
+			OR ( "j"."GenArtifactMaterialType" = 'Mortar' AND C."GenArtifactForm" LIKE'Axe%' ) 
+			OR ( "j"."GenArtifactMaterialType" LIKE '%Bog Iron%' AND c."GenArtifactForm" NOT LIKE 'Pebble%' ) 
+			OR ( "j"."GenArtifactMaterialType" LIKE 'Plaster/Mo%' OR c."GenArtifactForm" LIKE 'Plaster/Mo%' ) 
+			OR ( c."GenArtifactForm" = 'Brick/Daub' AND "j"."GenArtifactMaterialType" NOT LIKE 'Brick/%' ) 
+			OR ( c."GenArtifactForm" = 'Stone, unidentified' ) 
+		) 
+	) 
+ORDER BY
+	a."ArtifactID"

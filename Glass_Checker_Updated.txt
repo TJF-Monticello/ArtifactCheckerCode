@@ -1,0 +1,123 @@
+SELECT
+"public"."tblGlass"."ArtifactID",
+"public"."tblGlass"."Quantity",
+"public"."tblGlass"."SherdThickness",
+"public"."tblGlass"."SherdSize",
+"public"."tblGlass"."SherdWeight",
+"public"."tblGlass"."LengthofRim",
+"public"."tblGlass"."RimDiameter",
+"public"."tblGlass"."BaseDiameter",
+"public"."tblGlass"."BaseLength",
+"public"."tblGlass"."Notes",
+"public"."tblGlassCompleteness"."GlassCompleteness",
+"public"."tblGlassForm"."GlassForm",
+"public"."tblBasicColor"."BasicColor",
+"public"."tblGlassMaterial"."GlassMaterial",
+"public"."tblGlassManuTech"."GlassManuTech",
+"public"."tblGlassMoldType"."MoldType",
+"public"."tblGlassBottleElement"."GlassBottleElement",
+"public"."tblYesNo"."YesNo" AS "Decorated?",
+"public"."tblGlassDecTechType"."GlassDecTechType",
+"public"."tblGlassStemwareFootShape"."StemwareFootShape",
+"public"."tblGlassStemwareBodyShape"."StemwareBodyShape",
+"public"."tblGlassStemShape"."StemShape",
+"public"."tblGlass"."DateAdded",
+"public"."tblGlass"."DateChanged",
+"public".users.last_name,
+"public".users.userid
+FROM
+"public"."tblGlass"
+LEFT JOIN "public"."tblGlassCompleteness" ON "public"."tblGlassCompleteness"."GlassCompletenessID" = "public"."tblGlass"."GlassCompletenessID"
+LEFT JOIN "public"."tblGlassForm" ON "public"."tblGlass"."GlassFormID" = "public"."tblGlassForm"."GlassFormID"
+LEFT JOIN "public"."tblBasicColor" ON "public"."tblGlass"."GlassBasicColorID" = "public"."tblBasicColor"."BasicColorID"
+LEFT JOIN "public"."tblGlassMaterial" ON "public"."tblGlass"."GlassMaterialID" = "public"."tblGlassMaterial"."GlassMaterialID"
+LEFT JOIN "public"."tblGlassManuTech" ON "public"."tblGlass"."GlassManuTechID" = "public"."tblGlassManuTech"."GlassManuTechID"
+LEFT JOIN "public"."tblGlassMoldType" ON "public"."tblGlass"."MoldTypeID" = "public"."tblGlassMoldType"."MoldTypeID"
+LEFT JOIN "public".users ON "public"."tblGlass"."EditorIDN" = "public".users.editor_id
+LEFT JOIN "public"."tblGlassBottle" ON "public"."tblGlassBottle"."ArtifactID" = "public"."tblGlass"."ArtifactID"
+LEFT JOIN "public"."tblGlassBottleElement" ON "public"."tblGlassBottle"."GlassBottleElementID" = "public"."tblGlassBottleElement"."GlassBottleElementID"
+LEFT JOIN "public"."tblYesNo" ON "public"."tblGlass"."DecorationYN" = "public"."tblYesNo"."YesNoID"
+LEFT JOIN "public"."tblGlassDecTech" ON "public"."tblGlassDecTech"."ArtifactID" = "public"."tblGlass"."ArtifactID"
+LEFT JOIN "public"."tblGlassDecTechType" ON "public"."tblGlassDecTech"."GlassDecTechTypeID" = "public"."tblGlassDecTechType"."GlassDecTypeTypeID"
+LEFT JOIN "public"."tblGlassStemShape" ON "public"."tblGlass"."StemShapeID" = "public"."tblGlassStemShape"."StemShapeID"
+LEFT JOIN "public"."tblGlassStemwareBodyShape" ON "public"."tblGlass"."StemwareBodyShapeID" = "public"."tblGlassStemwareBodyShape"."StemwareBodyShapeID"
+LEFT JOIN "public"."tblGlassStemwareFootShape" ON "public"."tblGlass"."StemwareFootShapeID" = "public"."tblGlassStemwareFootShape"."StemwareFootShapeID"
+WHERE
+(
+	(
+(("public"."tblGlass"."ArtifactID" LIKE '1055%') 
+AND
+("public".users.userid = 'ebollwerk') )
+-- Manutech and Mold Type Mismatch
+AND
+	(
+(("public"."tblGlassManuTech"."GlassManuTech" = 'Mouth Blown' AND
+"public"."tblGlassMoldType"."MoldType" <> 'Missing Information') )
+OR
+("public"."tblGlassManuTech"."GlassManuTech" = 'Free Blown' AND
+"public"."tblGlassMoldType"."MoldType" <> 'Not Applicable') 
+OR
+("public"."tblGlassManuTech"."GlassManuTech" = 'Unidentifiable' AND
+"public"."tblGlassMoldType"."MoldType" <> 'Not Applicable') 
+OR
+("public"."tblGlassManuTech"."GlassManuTech" = 'Mold Blown' AND
+"public"."tblGlassForm"."GlassForm" LIKE 'Bottle%'
+		AND ("public"."tblGlassMoldType"."MoldType" not like '%Mold')) 
+or
+("public"."tblGlassManuTech"."GlassManuTech" = 'Mold Blown' AND
+"public"."tblGlassMoldType"."MoldType" = 'Missing Information') 
+OR
+("public"."tblGlassManuTech"."GlassManuTech" = 'Machine Made' AND
+"public"."tblGlassMoldType"."MoldType" <> 'Contact Mold') 
+OR
+("public"."tblGlassManuTech"."GlassManuTech" = 'Mold Blown' AND
+"public"."tblGlassMoldType"."MoldType" = 'Not Applicable') 
+-- Material
+OR
+("public"."tblGlassMaterial"."GlassMaterial" = 'Lead' AND
+"public"."tblBasicColor"."BasicColor" <> 'Colorless/Clear') 
+-- Glass Bottle Elements Missing
+OR
+("public"."tblGlassManuTech"."GlassManuTech" = 'Mouth Blown' AND
+"public"."tblGlassForm"."GlassForm" LIKE 'Bottle%' AND
+"public"."tblGlassCompleteness"."GlassCompleteness" LIKE '%Finish%'AND
+"public"."tblGlassBottle"."GlassBottleElementID" IS NULL)
+-- Measurements Missing
+OR
+("public"."tblGlassForm"."GlassForm" IN ('Bowl', 'Decanter', 'Drinking Glass, unidentifiable', 'Jelly Glass', 'Salver', 'Stemware',
+'Stopper', 'Tableware, unidentifiable', 'Tumbler') AND "public"."tblGlass"."SherdSize" > 15
+AND "public"."tblGlass"."SherdThickness" IS NULL AND "public"."tblGlass"."Notes" NOT LIKE '%not%'
+AND "public"."tblGlass"."Notes" NOT LIKE '%nable%'
+AND "public"."tblGlass"."Notes" NOT LIKE '%pall%')
+OR
+("public"."tblGlass"."SherdWeight" IS NULL)
+OR
+(("public"."tblGlassCompleteness"."GlassCompleteness" NOT LIKE 'Complete Object'
+AND "public"."tblGlass"."Quantity" = 1
+AND "public"."tblGlass"."SherdSize" IS NULL)
+OR
+("public"."tblGlassForm"."GlassForm" NOT LIKE 'Bottle%' and "public"."tblGlassForm"."GlassForm" NOT LIKE 'Container%'
+AND ("public"."tblGlassCompleteness"."GlassCompleteness" LIKE '%Rim%'
+AND "public"."tblGlass"."LengthofRim" IS NULL)) 
+-- Decoration Mismatch
+OR
+(("public"."tblYesNo"."YesNo" = 'Yes' AND
+"public"."tblGlassDecTechType"."GlassDecTechType" IS NULL) 
+OR
+("public"."tblYesNo"."YesNo" = 'No' AND
+"public"."tblGlassDecTechType"."GlassDecTechType" LIKE '%')) 
+--Stemware Info Missing
+OR
+("public"."tblGlassForm"."GlassForm" = 'Stemware' AND
+"public"."tblGlassCompleteness"."GlassCompleteness" LIKE '%Body%'
+		AND "public"."tblGlassStemwareBodyShape"."StemwareBodyShape" = 'Not Applicable')
+OR
+("public"."tblGlassForm"."GlassForm" = 'Stemware' AND
+"public"."tblGlassCompleteness"."GlassCompleteness" LIKE '%Foot%'
+		AND "public"."tblGlassStemwareFootShape"."StemwareFootShape" = 'Not Applicable')
+OR
+("public"."tblGlassForm"."GlassForm" = 'Stemware' AND
+"public"."tblGlassCompleteness"."GlassCompleteness" LIKE '%Stem%'
+		AND "public"."tblGlassStemShape"."StemShape" = 'Not Applicable')))))
+ORDER BY
+"public"."tblGlass"."ArtifactID" ASC

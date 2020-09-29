@@ -1,0 +1,30 @@
+SELECT
+"a"."ArtifactID",
+"a"."Quantity",
+"a"."Weight",
+"b"."BuckleCompleteness",
+"c"."BuckleFormID",
+"d"."BucklePart",
+"a"."Notes",
+"public".users.last_name
+FROM
+"public"."tblBuckle" AS "a"
+LEFT JOIN "public"."tblBuckleCompleteness" AS "b" ON "a"."BuckleCompletenessID" = "b"."BuckleCompletenessID"
+LEFT JOIN "public"."tblBuckleForm" AS "c" ON "a"."ArtifactID" = "c"."ArtifactID"
+LEFT JOIN "public"."tblBucklePart" AS "d" ON "c"."BucklePartID" = "d"."BucklePartID"
+LEFT JOIN "public".users ON "a"."EditorIDN" = "public".users.editor_id
+WHERE
+(("a"."ArtifactID" LIKE '9999%') 
+AND
+("public".users.userid = 'ebollwerk'))
+AND
+---1---
+("a"."Quantity" <> 1 OR 
+---2---
+"a"."Weight" IS NULL 
+---3---
+OR "c"."BuckleFormID" IS NULL 
+---4---
+OR d."BucklePartID" IS NULL) 
+AND
+("a"."Notes" NOT LIKE '%issing%' AND "a"."Notes" NOT LIKE '%nknown%') 
