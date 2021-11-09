@@ -1,0 +1,74 @@
+SELECT
+  "public"."tblLithic"."ArtifactID",
+	"public"."tblLithic"."Quantity",
+	"public"."tblLithic"."Weight",
+	"public"."tblLithicCategory"."LithicCategory",
+	"public"."tblLithicForm"."LithicForm",
+  "public"."tblLithicCompleteness"."LithicCompleteness",
+  "public"."tblLithicManuTech"."LithicManuTech",
+	"public"."tblLithicFlakeType"."LithicFlakeType",
+	"public"."tblLithicScreenSize"."LithicScreenSize",
+  "public"."tblLithicCortexType"."LithicCortexType",
+  "public"."tblLithicCoreForm"."LithicCoreForm",
+	"public"."tblLithic"."DateAdded" AS "Date Added",
+	"public"."tblLithic"."DateChanged" AS "Date Changed",
+	"public"."tblLithic"."Notes",
+	users.userid AS "User" 
+
+FROM
+	"tblLithic"
+	LEFT JOIN "tblLithicCategory" ON  "public"."tblLithic"."LithicCategoryID" = "public"."tblLithicCategory"."LithicCategoryID"
+	LEFT JOIN "tblLithicCompleteness" ON "public"."tblLithic"."LithicCompletenessID" = "public"."tblLithicCompleteness"."LithicCompletenessID"
+	LEFT JOIN "tblLithicForm" ON "public"."tblLithic"."LithicFormID" = "public"."tblLithicForm"."LithicFormID"
+	LEFT JOIN "tblLithicFlakeType" ON "public"."tblLithic"."LithicFlakeTypeID" = "public"."tblLithicFlakeType"."LithicFlakeTypeID"
+	LEFT JOIN "tblLithicManuTech" ON "public"."tblLithic"."LithicManuTechID" = "public"."tblLithicManuTech"."LithicManuTechID"
+  LEFT JOIN "tblLithicScreenSize" ON "public"."tblLithic"."LithicScreenSizeID" = "public"."tblLithicScreenSize"."LithicScreenSizeID"
+  LEFT JOIN "tblLithicCortexType" ON "public"."tblLithic"."LithicCortexTypeID" = "tblLithicCortexType"."LithicCortexTypeID"
+	LEFT JOIN "tblLithicCoreForm" ON "public"."tblLithic"."LithicCoreFormID" = "public"."tblLithicCoreForm"."LithicCoreFormID"
+	LEFT JOIN "tblEditor" ON "public"."tblLithic"."EditorIDN" = "public"."tblEditor"."EditorID"
+	LEFT JOIN users ON "public"."tblLithic"."EditorID" = users.editor_id
+	
+WHERE
+(
+		("tblLithic"."ArtifactID" LIKE '1058%' AND users.userid = 'ebollwerk')
+AND 
+(
+--1.0 Missing Measurements
+	("tblLithic"."Weight" IS NULL 
+			AND "tblLithic"."Notes" NOT LIKE '%eight%')
+
+OR
+--2.0 Form CHECK
+-- We don't use the term biface or preform
+ "tblLithicForm"."LithicForm" NOT IN ('Biface', 'Preform') 
+OR
+--3.0 Category Check
+  "tblLithicForm"."LithicForm" = 'Flake' AND "tblLithicCategory"."LithicCategory" NOT LIKE 'Debitage'
+OR
+  "tblLithicForm"."LithicForm" = 'Core' AND "public"."tblLithicCoreForm"."LithicCoreForm" = 'Bifacial' AND "tblLithicCategory"."LithicCategory" NOT LIKE 'Indeterminate'
+OR
+--4.0 Manutech Checks
+	"tblLithicForm"."LithicForm" = 'Flake' AND "tblLithicManuTech"."LithicManuTech" NOT LIKE 'Flaked' 
+OR
+ "tblLithicForm"."LithicForm" = 'Shatter' AND "tblLithicManuTech"."LithicManuTech" NOT LIKE 'Indeterminate' 
+OR 
+ "tblLithicForm"."LithicForm" = 'Core' AND "tblLithicManuTech"."LithicManuTech" NOT LIKE 'Flaked' 
+OR	
+"tblLithicManuTech"."LithicManuTech" IS NULL
+
+--5.0 Flake type Checks
+OR 
+ "tblLithicForm"."LithicForm" = 'Shatter' AND "tblLithicFlakeType"."LithicFlakeType" NOT LIKE 'Not Applicable'
+OR
+  "tblLithicForm"."LithicForm" = 'Flake' AND "public"."tblLithicScreenSize"."LithicScreenSize" NOT IN ('1/4 inch','1/2 inch','1 inch','2 inch')
+OR 
+  "tblLithicForm"."LithicForm" = 'Flake' AND "tblLithicCortexType"."LithicCortexType" = 'Not Applicable'
+
+--6.0 Completeness Check
+OR
+  "tblLithicForm"."LithicForm" = 'Flake' AND "tblLithicCompleteness"."LithicCompleteness" NOT LIKE 'Not Recorded'
+)
+)
+
+ORDER BY
+	"tblLithic"."ArtifactID"
