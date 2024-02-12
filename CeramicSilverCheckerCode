@@ -1,0 +1,91 @@
+------Ceramic Checker Code for Silver Interface-----
+--Originally written by EAB 2/12/2024--
+
+SELECT
+"a"."ArtifactID",
+"a"."Quantity",
+e."CeramicVesselCategory" AS "Category",
+f."CeramicForm" AS "Form",
+"g"."Ware",
+c."CeramicMaterial" AS "Material",
+b."CeramicManuTech" AS "Manufacturing Technique",
+d."CeramicCompleteness" AS "Completeness",
+j."MendYN" AS "Mended",
+"k"."CeramicForm" AS "Mended Form",
+"a"."SherdWeight" AS "Weight",
+"a"."MendedSherdWeight" AS "Mended Sherd Weight",
+"a"."MaximumSherdMeasurement" AS "Max Measure",
+h."CeramicGlaze" AS "Exterior Glaze",
+i."CeramicGlaze" AS "Interior Glaze",
+"o"."AppliedColorWrittenDescription" as "ExtColor",
+"p"."AppliedColorWrittenDescription" as "IntColor",
+"public"."tblYesNo"."YesNo" AS "Decoration",
+q."CeramicGenre" AS "Genre",
+"a"."DateAdded" AS "Date Added",
+"a"."DateChanged" AS "Date Changed",
+"a"."Notes",
+"public".users.userid
+FROM
+"public"."tblCeramic" AS "a"
+LEFT JOIN "public"."tblCeramicManuTech" AS "b" ON "a"."CeramicManuTechID" = "b"."CeramicManuTechID"
+LEFT JOIN "public"."tblCeramicMaterial" AS "c" ON "a"."CeramicMaterialID" = "c"."CeramicMaterialID"
+LEFT JOIN "public"."tblCeramicCompleteness" AS "d" ON "a"."CeramicCompletenessID" = d."CeramicCompletenessID"
+LEFT JOIN "public"."tblCeramicVesselCategory" AS "e" ON "a"."CeramicVesselCategoryID" = e."CeramicVesselCategoryID"
+LEFT JOIN "public"."tblCeramicForm" AS "f" ON "a"."CeramicFormID" = f."CeramicFormID"
+LEFT JOIN "public"."tblCeramicWare" AS "g" ON "a"."WareID" = "g"."WareID"
+LEFT JOIN "public"."tblCeramicGlaze" AS "h" ON "a"."ExteriorGlazeID" = h."CeramicGlazeID"
+LEFT JOIN "public"."tblCeramicGlaze" AS "i" ON "a"."InteriorGlazeID" = i."CeramicGlazeID"
+LEFT JOIN "public"."tblMendYN" AS "j" ON j."MendYNID" = "a"."MendedYNID"
+LEFT JOIN "public"."tblCeramicForm" AS "k" ON "a"."MendedFormID" = "k"."CeramicFormID"
+LEFT JOIN "public"."tblCeramicUseWear" AS l ON "a"."ArtifactID" = l."ArtifactID"
+LEFT JOIN "public"."tblCeramicUseWearLocation" AS "m" ON l."UseWearLocationID" = "m"."UseWearLocationID"
+LEFT JOIN "public"."tblCeramicUseWearPattern" AS n ON l."UseWearPatternID" = n."UseWearPatternID"
+LEFT JOIN "public"."tblMunsellAppliedColor" as "o" ON "a"."ExteriorMunAppColorID" = "o"."MunAppColorID"
+LEFT JOIN "public"."tblMunsellAppliedColor" as "p" ON "a"."InteriorMunAppColorID" = "p"."MunAppColorID"
+LEFT JOIN "public"."tblCeramicGenre" AS "q" ON "a"."CeramicGenreID" = q."CeramicGenreID"
+LEFT JOIN "public"."tblYesNo" ON "a"."DecorationYN" = "public"."tblYesNo"."YesNoID"
+LEFT JOIN "public"."tblCeramicGlazeOpacity" AS "r" ON "a"."ExteriorGlazeOpacityID" = "r"."CeramicGlazeOpacityID"
+LEFT JOIN "public"."tblCeramicGlazeOpacity" AS "s" ON "a"."InteriorGlazeOpacityID" = "s"."CeramicGlazeOpacityID" 
+LEFT JOIN "public"."tblEditor" AS "t" ON "a"."EditorIDN" = "t"."EditorID"
+LEFT JOIN "public".users ON "public".users.editor_id = "t"."EditorID"
+
+
+WHERE
+-- Enter project that you are checking and your username
+(
+	(("a"."ArtifactID" LIKE '5007-%') AND
+	("public".users.userid LIKE 'ebollwerk')) 
+     AND
+     (
+-- 1.0 Measurements Missing
+"a"."SherdWeight" IS NULL 
+OR  (a."MaximumSherdMeasurement" IS NULL AND a."Notes" not like '%not found%')
+
+-- 2.0 Form and Category Mismatches
+OR  ("c"."CeramicMaterial" = 'Coarse EW' and g."Ware" like 'Caribbean%')
+OR  (f."CeramicForm" = 'Saucer' AND e."CeramicVesselCategory" = 'Hollow')
+OR  (f."CeramicForm" = 'Plate' AND e."CeramicVesselCategory" = 'Hollow')
+OR  (b."CeramicManuTech" = 'Wheel Thrown' AND e."CeramicVesselCategory" = 'Flat')
+
+-- 3.0 Decoration
+OR  ("public"."tblYesNo"."YesNo" = 'Yes' AND q."CeramicGenre" = 'Not Applicable' AND a."Notes" NOT LIKE '%not%')
+OR ("public"."tblYesNo"."YesNo" = 'No' AND q."CeramicGenre" != 'Not Applicable')
+
+-- 4.0 Surfaces
+OR h."CeramicGlaze"  IS NULL
+OR i."CeramicGlaze" IS NULL
+OR "o"."AppliedColorWrittenDescription" IS NULL
+OR "p"."AppliedColorWrittenDescription" IS NULL
+
+-- 5.0 Mends
+  OR  ((j."MendYN" like 'Yes,%')  AND (k."CeramicForm" = 'Not Mended'))
+  OR  (j."MendYN" like 'Yes, Phys%' AND a."MendedSherdWeight" IS NULL)
+  OR  (a."Notes" like '%ended%' AND (a."Notes" NOT LIKE '%not%' OR a."Notes" not like '%fresh%' OR a."Notes" not like '%after%' ) AND k."CeramicForm" = 'Not Mended')
+  OR  (a."Notes" like '%ended%' AND (a."Notes" NOT LIKE '%not%' OR a."Notes" not like '%fresh%' OR a."Notes" not like '%after%') AND j."MendYN" = 'No')
+  OR  ((k."CeramicForm" = 'Not Mended' or k."CeramicForm" = 'Not Applicable') and j."MendYN" like 'Yes%')
+  OR  (k."CeramicForm" NOT LIKE 'Not%' and j."MendYN" = 'No')
+   )
+)
+
+ORDER BY
+"a"."ArtifactID" ASC
