@@ -1,0 +1,166 @@
+------Ceramic Checker Code for Silver Interface-----
+--Originally written by EAB 2/12/2024--
+--Updated 6/27/2024 by EAB to include more details on CEWs--
+
+SELECT
+	a."ArtifactID", 
+	a."Quantity", 
+	e."CeramicVesselCategory" AS "Category", 
+	f."CeramicForm" AS "Form", 
+	g."Ware", 
+	c."CeramicMaterial" AS "Material", 
+	b."CeramicManuTech" AS "Manufacturing Technique", 
+	d."CeramicCompleteness" AS "Completeness", 
+	"tblCeramicTinEnamelType"."TinEnamelType",
+	a."PasteSedimentColorID" AS "TEW_PasteColor",
+	j."MendYN" AS "Mended", 
+	k."CeramicForm" AS "Mended Form", 
+	a."SherdThickness", 
+	ee."ColonoSherdThickness" AS "AlternateSherdThickness", 
+	a."SherdWeight" AS "Weight", 
+	a."MendedSherdWeight" AS "Mended Sherd Weight", 
+	a."MaximumSherdMeasurement" AS "Max Measure", 
+	h."CeramicGlaze" AS "Exterior Glaze", 
+	i."CeramicGlaze" AS "Interior Glaze", 
+	o."AppliedColorWrittenDescription" AS "ExtColor", 
+	p."AppliedColorWrittenDescription" AS "IntColor", 
+	"tblYesNo"."YesNo" AS "Decoration", 
+	q."CeramicGenre" AS "Genre", 
+	ab."CeramicCEWDecMode" AS "CoarseEarthenwareDecorativeMode", 
+	a."DateAdded" AS "Date Added", 
+	a."DateChanged" AS "Date Changed", 
+	a."Notes", 
+	users.userid
+	
+FROM
+	"tblCeramic" AS "a"
+	LEFT JOIN "tblCeramicManuTech" AS b ON a."CeramicManuTechID" = b."CeramicManuTechID"
+	LEFT JOIN "tblCeramicMaterial" AS "c" ON  a."CeramicMaterialID" = c."CeramicMaterialID"
+	LEFT JOIN "tblCeramicCompleteness" AS d ON a."CeramicCompletenessID" = d."CeramicCompletenessID"
+	LEFT JOIN "tblCeramicVesselCategory" AS e ON a."CeramicVesselCategoryID" = e."CeramicVesselCategoryID"
+	LEFT JOIN "tblCeramicForm" AS f ON a."CeramicFormID" = f."CeramicFormID"
+	LEFT JOIN "tblCeramicWare" AS "g" ON a."WareID" = g."WareID"
+	LEFT JOIN "tblCeramicGlaze" AS h ON a."ExteriorGlazeID" = h."CeramicGlazeID"
+	LEFT JOIN "tblCeramicGlaze" AS i ON a."InteriorGlazeID" = i."CeramicGlazeID"
+	LEFT JOIN "tblMendYN" AS j ON j."MendYNID" = a."MendedYNID"
+	LEFT JOIN "tblCeramicForm" AS "k" ON a."MendedFormID" = k."CeramicFormID"
+	LEFT JOIN "tblCeramicUseWear" AS l ON a."ArtifactID" = l."ArtifactID"
+	LEFT JOIN "tblCeramicUseWearLocation" AS "m" ON l."UseWearLocationID" = m."UseWearLocationID"
+	LEFT JOIN "tblCeramicUseWearPattern" AS n ON l."UseWearPatternID" = n."UseWearPatternID"
+	LEFT JOIN "tblMunsellAppliedColor" AS o ON a."ExteriorMunAppColorID" = o."MunAppColorID"
+	LEFT JOIN "tblMunsellAppliedColor" AS "p" ON a."InteriorMunAppColorID" = p."MunAppColorID"
+	LEFT JOIN "tblCeramicGenre" AS q ON a."CeramicGenreID" = q."CeramicGenreID"
+	LEFT JOIN "tblYesNo" ON a."DecorationYN" = "tblYesNo"."YesNoID"
+	LEFT JOIN "tblCeramicGlazeOpacity" AS r ON a."ExteriorGlazeOpacityID" = r."CeramicGlazeOpacityID"
+	LEFT JOIN "tblCeramicGlazeOpacity" AS s ON a."InteriorGlazeOpacityID" = s."CeramicGlazeOpacityID"
+	LEFT JOIN "tblCeramicColonoThickness" AS ee ON a."ArtifactID" = ee."ArtifactID"
+	LEFT JOIN "tblCeramicCEWDecMode" AS ab ON a."CeramicCEWDecModeID" = ab."CeramicCEWDecModeID"
+	LEFT JOIN "tblEditor" AS "t" ON a."EditorIDN" = t."EditorID"
+	LEFT JOIN users ON users.editor_id = t."EditorID"
+	INNER JOIN "tblCeramicTinEnamelType" ON a."CeramicTinEnamelTypeID" = "tblCeramicTinEnamelType"."TinEnamelTypeID"
+	
+	
+WHERE
+	(
+		(
+			(
+				a."ArtifactID" LIKE '5006%') AND (users.userid LIKE 'ebollwerk')
+		) AND
+		-- 1.0 Measurements 
+		(a."SherdWeight" IS NULL OR (a."MaximumSherdMeasurement" IS NULL AND a."Notes" NOT LIKE '%not found%') OR
+			(g."Ware" IN ('Native American','Colonoware') AND d."CeramicCompleteness" LIKE '%im%' AND "tblYesNo"."YesNo" = 'Yes' AND ee."ColonoSherdThickness" IS NULL) OR
+			
+		--2.0 Category mismatches
+			(c."CeramicMaterial" = 'Coarse EW' AND g."Ware" LIKE 'Caribbean%') OR
+			(f."CeramicForm" = 'Saucer' AND e."CeramicVesselCategory" = 'Hollow') OR
+			(f."CeramicForm" = 'Plate' AND e."CeramicVesselCategory" = 'Hollow') OR
+			(
+				b."CeramicManuTech" = 'Wheel Thrown' AND
+				e."CeramicVesselCategory" = 'Flat' AND
+				g."Ware" NOT IN ('Majolica','Faience')
+			) OR
+			(
+				c."CeramicMaterial" IN ('Refined EW','Stoneware') AND
+				"tblYesNo"."YesNo" = 'Yes' AND
+				q."CeramicGenre" = 'Not Applicable' AND
+				(
+					(
+						a."Notes" NOT LIKE '%loud%' AND
+						a."Notes" NOT LIKE '%not%' AND
+						a."Notes" NOT LIKE '%ort%' AND
+						a."Notes" NOT LIKE '%ordon%' AND
+						a."Notes" NOT LIKE '%elon%' AND
+						a."Notes" NOT LIKE '%olded%' AND
+						a."Notes" NOT LIKE '%kerry%' AND
+						a."Notes" NOT LIKE '%rystal%' AND
+						a."Notes" NOT LIKE '%uster%'
+					)
+				)
+			) OR
+			(
+				g."Ware" IN ('Native American','Colonoware') AND
+				"tblYesNo"."YesNo" = 'Yes' AND
+				ab."CeramicCEWDecMode" = 'Not Applicable'
+			) OR
+			(
+				g."Ware" IN ('Native American','Colonoware') AND
+				ab."CeramicCEWDecMode" LIKE '%urnish%' AND
+				a."SherdThickness" IS NULL
+			) OR
+			(
+				g."Ware" IN ('Native American','Colonoware') AND
+				ab."CeramicCEWDecMode" LIKE '%lip%' AND
+				a."SherdThickness" IS NULL AND
+				(
+					a."Notes" NOT LIKE '%issing%'
+				)
+			) OR
+			h."CeramicGlaze" IS NULL OR
+			i."CeramicGlaze" IS NULL OR
+			o."AppliedColorWrittenDescription" IS NULL OR
+			p."AppliedColorWrittenDescription" IS NULL OR
+			(
+				(
+					j."MendYN" LIKE 'Yes,%'
+				) AND
+				(
+					k."CeramicForm" = 'Not Mended'
+				)
+			) OR
+			(
+				j."MendYN" LIKE 'Yes, Phys%' AND
+				a."MendedSherdWeight" IS NULL
+			) OR
+			(
+				a."Notes" LIKE '%ended%' AND
+				(
+					a."Notes" NOT LIKE '%not%' AND
+					a."Notes" NOT LIKE '%resh%' AND
+					a."Notes" NOT LIKE '%after%'
+				) AND
+				k."CeramicForm" = 'Not Mended'
+			) OR
+			(
+				a."Notes" LIKE '%ended%' AND
+				(
+					a."Notes" NOT LIKE '%not%' AND
+					a."Notes" NOT LIKE '%resh%' AND
+					a."Notes" NOT LIKE '%after%'
+				) AND
+				j."MendYN" = 'No'
+			) OR
+			(
+				(
+					k."CeramicForm" = 'Not Mended' OR
+					k."CeramicForm" = 'Not Applicable'
+				) AND
+				j."MendYN" LIKE 'Yes%'
+			) OR
+			(
+				k."CeramicForm" NOT LIKE 'Not%' AND
+				j."MendYN" = 'No'
+			)
+		)
+	)
+ORDER BY
+	a."ArtifactID" ASC
